@@ -17,8 +17,8 @@ export const User = () => {
         setUserMetadataLoadingState("loading");
 
         const accessToken = await getAccessTokenSilently({
-          audience: `https://${domain}/api/v2/`,
-          scope: "read:current_user"
+          audience: import.meta.env.VITE_REACT_APP_AUTH0_API_AUDIENCE,
+          scope: import.meta.env.VITE_REACT_APP_AUTH0_API_SCOPE
         });
 
         const userDetailsByIdUrl = `https://${domain}/api/v2/users/${user?.sub}`;

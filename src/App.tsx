@@ -1,26 +1,56 @@
-import React from "react";
-import { LoginButton } from "components/LoginButton";
-import { User } from "components/User";
-import { useAuth0 } from "@auth0/auth0-react";
-import { LogoutButton } from "components/LogoutButton";
+import React, { useState } from "react";
+import { BasicPage } from "pages/BasicPage";
+import { ReactRouterPage } from "pages/ReactRouterPage";
+import { Auth0ProviderWithRedirect } from "auth/Auth0ProviderWithRedirect";
+import { Auth0Provider } from "@auth0/auth0-react";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { ProtectedRoute } from "auth/ProtectedRoute";
 
 export const App = () => {
-  const { isLoading, isAuthenticated } = useAuth0();
-
-  if (isLoading) return <div>Loading...</div>;
+  const [reactRouterPage, setReactRouterPage] = useState(false);
 
   return (
-    <div className="App">
-      {!isAuthenticated ? (
-        <div>
-          <p style={{ fontSize: "1.5rem" }}>Please Login.</p>
-          <LoginButton />
-        </div>
+    <div>
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end"
+        }}
+      >
+        With react-router protected routes
+        <input
+          type="checkbox"
+          checked={reactRouterPage}
+          onChange={() => {
+            setReactRouterPage((prevState) => !prevState);
+          }}
+        />
+      </label>
+
+      {reactRouterPage ? (
+        <BrowserRouter>
+          <Auth0ProviderWithRedirect>
+            <Routes>
+              <Route
+                path="/"
+                element={<ProtectedRoute component={ReactRouterPage} />}
+              />
+            </Routes>
+          </Auth0ProviderWithRedirect>
+        </BrowserRouter>
       ) : (
-        <div>
-          <LogoutButton />
-          <User />
-        </div>
+        <Auth0Provider
+          domain={import.meta.env.VITE_REACT_APP_AUTH0_DOMAIN}
+          clientId={import.meta.env.VITE_REACT_APP_AUTH0_CLIENT_ID}
+          audience={import.meta.env.VITE_REACT_APP_AUTH0_API_AUDIENCE}
+          scope={import.meta.env.VITE_REACT_APP_AUTH0_API_SCOPE}
+          redirectUri={window.location.origin}
+          cacheLocation="localstorage"
+          useRefreshTokens
+        >
+          <BasicPage />
+        </Auth0Provider>
       )}
     </div>
   );
